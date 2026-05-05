@@ -3,6 +3,7 @@ import { useState } from "react";
 function App() {
   const [text, setText] = useState("");
   const [events, setEvents] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
 
   const handleClick = async () => {
     const res = await fetch("http://localhost:5000/parse", {
@@ -16,8 +17,30 @@ function App() {
     const data = await res.json();
 
     if (!data.error) {
-      setEvents((prev) => [...prev, data]); // add new event
+      if (editIndex !== null) {
+        // update existing event
+        const updated = [...events];
+        updated[editIndex] = data;
+        setEvents(updated);
+        setEditIndex(null);
+      } else {
+        // add new event
+        setEvents((prev) => [...prev, data]);
+      }
+
+      setText("");
     }
+  };
+
+  const handleDelete = (index) => {
+    const filtered = events.filter((_, i) => i !== index);
+    setEvents(filtered);
+  };
+
+  const handleEdit = (index) => {
+    const event = events[index];
+    setText(`${event.title} ${event.time} ${event.date}`);
+    setEditIndex(index);
   };
 
   return (
@@ -32,16 +55,23 @@ function App() {
           placeholder="e.g. Meeting at 9"
           style={styles.input}
         />
-        <button onClick={handleClick}>Add</button>
+        <button onClick={handleClick}>
+          {editIndex !== null ? "Update" : "Add"}
+        </button>
       </div>
 
-      {/* Events List */}
+      {/* Events */}
       <div style={styles.list}>
         {events.map((event, index) => (
           <div key={index} style={styles.card}>
             <h3>{event.title}</h3>
             <p>📅 {event.date}</p>
             <p>⏰ {event.time}</p>
+
+            <div style={styles.actions}>
+              <button onClick={() => handleEdit(index)}>✏️ Edit</button>
+              <button onClick={() => handleDelete(index)}>❌ Delete</button>
+            </div>
           </div>
         ))}
       </div>
@@ -73,6 +103,11 @@ const styles = {
     padding: "15px",
     border: "1px solid #ddd",
     borderRadius: "8px",
+  },
+  actions: {
+    marginTop: "10px",
+    display: "flex",
+    gap: "10px",
   },
 };
 
