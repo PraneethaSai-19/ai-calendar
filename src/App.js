@@ -483,97 +483,145 @@ function App() {
 
 const styles = {
   container: {
-    maxWidth: "950px",
+    maxWidth: "1100px",
     margin: "20px auto",
     fontFamily: "Segoe UI",
-    padding: "0 16px",
+    padding: "0 18px",
   },
 
   title: {
     textAlign: "center",
-    marginBottom: "20px",
+    marginBottom: "24px",
+    fontSize: "44px",
+    fontWeight: "700",
   },
+
+  // ==========================
+  // INPUT ROW
+  // ==========================
 
   inputBox: {
     display: "flex",
-    gap: "10px",
-    marginBottom: "20px",
+    gap: "14px",
+    marginBottom: "24px",
+    alignItems: "center",
   },
+
+  // ==========================
+  // INPUT
+  // ==========================
 
   input: {
     flex: 1,
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "15px",
-    marginBottom: "10px",
+    height: "56px",
+    padding: "0 18px",
+    borderRadius: "14px",
+    border: "1px solid #d6d6d6",
+    fontSize: "16px",
+    outline: "none",
+    boxSizing: "border-box",
+    background: "white",
   },
 
+  // ==========================
+  // MAIN BUTTON
+  // ==========================
+
   button: {
-    padding: "12px 20px",
+    height: "56px",
+    padding: "0 30px",
     background: "#2196f3",
     color: "white",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "14px",
     cursor: "pointer",
-    marginTop: "10px",
+    fontSize: "16px",
+    fontWeight: "600",
+    transition: "0.2s",
   },
 
+  // ==========================
+  // UPLOAD
+  // ==========================
+
   uploadSection: {
-    marginBottom: "20px",
+    marginBottom: "24px",
   },
 
   previewImage: {
-    width: "220px",
+    width: "240px",
     display: "block",
-    marginTop: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ccc",
+    marginTop: "12px",
+    borderRadius: "14px",
+    border: "1px solid #ddd",
   },
+
+  // ==========================
+  // NAVIGATION
+  // ==========================
 
   nav: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "12px",
+    marginBottom: "18px",
   },
 
   arrowBtn: {
-    width: "36px",
-    height: "36px",
+    width: "42px",
+    height: "42px",
     borderRadius: "50%",
     border: "1px solid #ccc",
     background: "white",
     cursor: "pointer",
+    fontSize: "18px",
   },
+
+  // ==========================
+  // CALENDAR
+  // ==========================
 
   calendar: {
     display: "grid",
     gridTemplateColumns: "repeat(7, 1fr)",
-    gap: "6px",
+    gap: "8px",
   },
 
   dayLabel: {
     textAlign: "center",
-    fontWeight: "bold",
-    padding: "6px 0",
+    fontWeight: "700",
+    padding: "10px 0",
+    fontSize: "15px",
   },
 
   day: {
-    minHeight: "110px",
-    padding: "6px",
-    borderRadius: "8px",
+    minHeight: "120px",
+    padding: "8px",
+    borderRadius: "12px",
     cursor: "pointer",
+    background: "white",
+    border: "1px solid #ddd",
+    transition: "0.2s",
   },
 
+  // ==========================
+  // EVENTS
+  // ==========================
+
   event: {
-    background: "#4CAF50",
+    background: "#43a047",
     color: "white",
-    padding: "6px 8px",
-    marginTop: "5px",
-    borderRadius: "6px",
+    padding: "7px 8px",
+    marginTop: "6px",
+    borderRadius: "8px",
     fontSize: "12px",
+    overflow: "hidden",
+    lineHeight: "1.4",
   },
+
+  // ==========================
+  // OVERLAY
+  // ==========================
 
   overlay: {
     position: "fixed",
@@ -581,52 +629,64 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.4)",
+    background: "rgba(0,0,0,0.45)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
   },
 
+  // ==========================
+  // MODAL
+  // ==========================
+
   modal: {
     background: "white",
-    padding: "24px",
-    borderRadius: "12px",
-    width: "320px",
+    padding: "28px",
+    borderRadius: "18px",
+    width: "340px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
   },
 
   modalActions: {
     display: "flex",
     justifyContent: "space-between",
-    marginTop: "20px",
+    marginTop: "22px",
     gap: "10px",
   },
+
+  // ==========================
+  // MODAL BUTTONS
+  // ==========================
 
   editBtn: {
     background: "#2196f3",
     color: "white",
     border: "none",
-    padding: "8px 14px",
-    borderRadius: "6px",
+    padding: "10px 16px",
+    borderRadius: "10px",
     cursor: "pointer",
+    fontWeight: "600",
   },
 
   deleteBtn: {
     background: "#f44336",
     color: "white",
     border: "none",
-    padding: "8px 14px",
-    borderRadius: "6px",
+    padding: "10px 16px",
+    borderRadius: "10px",
     cursor: "pointer",
+    fontWeight: "600",
   },
 
   closeBtn: {
-    background: "#777",
+    background: "#757575",
     color: "white",
     border: "none",
-    padding: "8px 14px",
-    borderRadius: "6px",
+    padding: "10px 16px",
+    borderRadius: "10px",
     cursor: "pointer",
+    fontWeight: "600",
   },
 };
 

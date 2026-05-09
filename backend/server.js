@@ -13,7 +13,6 @@ const { Mistral } = require("@mistralai/mistralai");
 const app = express();
 
 app.use(cors());
-
 app.use(express.json());
 
 // ==========================
@@ -25,7 +24,7 @@ const client = new Mistral({
 });
 
 // ==========================
-// MULTER
+// MULTER SETUP
 // ==========================
 
 const storage = multer.diskStorage({
@@ -41,7 +40,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ==========================
-// DATE FORMATTER
+// FORMAT DATE
 // ==========================
 
 function formatLocalDate(date) {
@@ -55,7 +54,7 @@ function formatLocalDate(date) {
 }
 
 // ==========================
-// SIMPLE TEXT PARSER
+// IMPROVED EVENT PARSER
 // ==========================
 
 function parseEvent(text) {
@@ -63,9 +62,13 @@ function parseEvent(text) {
 
   const lower = text.toLowerCase();
 
-  let date = formatLocalDate(today);
+  let eventDate = new Date(today);
 
   let time = "";
+
+  // ==========================
+  // MONTHS
+  // ==========================
 
   const months = {
     january: 0,
@@ -82,23 +85,50 @@ function parseEvent(text) {
     december: 11,
   };
 
+  // ==========================
+  // MONTH + DATE
+  // ==========================
+
   const monthDateMatch = lower.match(
-    /(january|february|march|april|may|june|july|august|september|october|november|december)\s*(\d{1,2})(st|nd|rd|th)?/,
+    /(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})/,
   );
 
   if (monthDateMatch) {
-    const monthName = monthDateMatch[1];
+    const month = months[monthDateMatch[1]];
 
-    const dayNumber = parseInt(monthDateMatch[2]);
+    const day = parseInt(monthDateMatch[2]);
 
-    const targetDate = new Date(
-      today.getFullYear(),
-      months[monthName],
-      dayNumber,
-    );
-
-    date = formatLocalDate(targetDate);
+    eventDate = new Date(today.getFullYear(), month, day);
   }
+
+  // ==========================
+  // SIMPLE DATE
+  // ==========================
+  else {
+    const simpleDateMatch =
+      lower.match(/\bon\s+(\d{1,2})\b/) ||
+      lower.match(/\b(\d{1,2})(st|nd|rd|th)?\b/);
+
+    if (simpleDateMatch) {
+      const day = parseInt(simpleDateMatch[1]);
+
+      if (day >= 1 && day <= 31) {
+        eventDate = new Date(today.getFullYear(), today.getMonth(), day);
+      }
+    }
+  }
+
+  // ==========================
+  // TOMORROW
+  // ==========================
+
+  if (lower.includes("tomorrow")) {
+    eventDate.setDate(today.getDate() + 1);
+  }
+
+  // ==========================
+  // TIME
+  // ==========================
 
   const timeMatch = lower.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
 
@@ -107,37 +137,63 @@ function parseEvent(text) {
 
     const minutes = timeMatch[2] || "00";
 
-    const period = timeMatch[3].toUpperCase();
+    const period = timeMatch[3].toLowerCase();
 
-    if (period === "PM" && hours !== 12) {
+    if (period === "pm" && hours !== 12) {
       hours += 12;
     }
 
-    if (period === "AM" && hours === 12) {
+    if (period === "am" && hours === 12) {
       hours = 0;
     }
 
     time = `${String(hours).padStart(2, "0")}:${minutes}`;
   }
 
-  let lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 3);
+  // ==========================
+  // CLEAN TITLE
+  // ==========================
 
-  let title = lines[0] || "Unknown Event";
+  let title = text;
 
-  title = title.replace(/[^a-zA-Z0-9\s]/g, "");
+  // REMOVE MONTH DATE
+  title = title.replace(
+    /(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}/gi,
+    "",
+  );
+
+  // REMOVE "on 11"
+  title = title.replace(/\bon\s+\d{1,2}\b/gi, "");
+
+  // REMOVE "11th"
+  title = title.replace(/\b\d{1,2}(st|nd|rd|th)?\b/gi, "");
+
+  // REMOVE TIME
+  title = title.replace(/\d{1,2}(:\d{2})?\s*(am|pm)/gi, "");
+
+  // REMOVE EXTRA WORDS
+  title = title.replace(/\b(on|at|tomorrow|today)\b/gi, "");
+
+  // CLEAN SPACES
+  title = title.replace(/\s+/g, " ").trim();
+
+  // CAPITALIZE
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+
+  // FALLBACK
+  if (!title) {
+    title = "Untitled Event";
+  }
 
   return {
     title,
-    date,
+    date: formatLocalDate(eventDate),
     time,
   };
 }
 
 // ==========================
-// TEXT INPUT ROUTE
+// MANUAL TEXT INPUT
 // ==========================
 
 app.post("/parse", (req, res) => {
@@ -157,7 +213,7 @@ app.post("/parse", (req, res) => {
 });
 
 // ==========================
-// OCR + MISTRAL ROUTE
+// OCR + AI ROUTE
 // ==========================
 
 app.post("/upload", upload.single("image"), async (req, res) => {
@@ -180,14 +236,17 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     // MISTRAL AI
     // ==========================
 
-    const response = await client.chat.complete({
-      model: "mistral-small-latest",
+    let parsed;
 
-      messages: [
-        {
-          role: "user",
+    try {
+      const response = await client.chat.complete({
+        model: "mistral-small-latest",
 
-          content: `
+        messages: [
+          {
+            role: "user",
+
+            content: `
 Extract the event details from this OCR text.
 
 Return ONLY valid JSON.
@@ -200,32 +259,27 @@ Format:
 }
 
 Rules:
-- Convert date into YYYY-MM-DD format
-- Convert time into 24 hour format
-- If missing use empty string
+- date must be YYYY-MM-DD
+- time must be 24 hour format
+- if missing use empty string
 
 OCR TEXT:
 ${extractedText}
 `,
-        },
-      ],
-    });
+          },
+        ],
+      });
 
-    const aiText = response.choices[0].message.content;
+      const aiText = response.choices[0].message.content;
 
-    console.log("MISTRAL OUTPUT:");
+      console.log("MISTRAL OUTPUT:");
 
-    console.log(aiText);
+      console.log(aiText);
 
-    // ==========================
-    // JSON PARSE
-    // ==========================
-
-    let parsed;
-
-    try {
       parsed = JSON.parse(aiText);
-    } catch {
+    } catch (aiError) {
+      console.log("AI FALLBACK USED");
+
       parsed = parseEvent(extractedText);
     }
 
