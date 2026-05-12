@@ -1,6 +1,6 @@
-# AI Calendar 📅🤖
+# Eventify 📅
 
-AI Calendar is a smart event management web application that allows users to create and manage events using natural language and AI-powered poster extraction.
+Eventify is a smart event management web application that allows users to create and manage events using natural language and AI-powered poster extraction.
 
 Users can:
 - Add events by typing natural language
@@ -61,7 +61,7 @@ Users can:
 
 # 🏗 Architecture Diagram
 
-![AI Calendar Architecture](./README-assets/architecture.png)
+![Eventify Architecture](./README-assets/architecture.png)
 
 ---
 
