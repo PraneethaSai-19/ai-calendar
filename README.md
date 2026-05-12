@@ -279,7 +279,7 @@ The system extracts event details automatically.
 
 # 👩‍💻 Author
 
-Developed by Praneetha Sai ✨
+Developed by Praneetha Sai Mogilisetti
 
 ---
 
